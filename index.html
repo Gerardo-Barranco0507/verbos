@@ -81,6 +81,13 @@ details ol{margin:10px 0 0;padding-left:20px;display:flex;flex-direction:column;
 .pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .pair{display:flex;flex-direction:column;align-items:flex-start;gap:0;border:2px solid var(--line);background:transparent;border-radius:14px;padding:8px 12px;text-align:left}
 .pair .w{font-size:18px;font-weight:800}
+.pw{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.pw > span{display:flex;flex-direction:column;min-width:0}
+.lab{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pw .past .lab{color:var(--fc)}
+.pw .v{font-size:18px;font-weight:800;overflow-wrap:anywhere}
+.flab{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:-8px}
+.flab.past{color:var(--fc,var(--blue))}
 .pair .w b{color:var(--fc)}
 .pair .es{font-size:13px;color:var(--muted)}
 .pair.speaking{border-color:var(--fc)}
@@ -219,7 +226,7 @@ function sayPair(v){
     synth.cancel();
     const mk=t=>{const u=new SpeechSynthesisUtterance(clean(t));u.lang='en-US';u.rate=0.7;if(enVoice)u.voice=enVoice;return u;};
     const a=mk(v.inf), b=mk(v.past);
-    let done=false; const next=()=>{ if(done) return; done=true; setTimeout(()=>{try{synth.speak(b)}catch(e){}},450); };
+    let done=false; const next=()=>{ if(done) return; done=true; setTimeout(()=>{try{synth.speak(b)}catch(e){}},1100); };
     a.onend=next;
     synth.speak(a);
   }catch(e){}
@@ -250,7 +257,7 @@ function renderEscucha(){
   el.innerHTML = FAM.map(f=>`
    <article class="fam" style="--fc:var(${f.c})">
      <div class="famhead"><div><h3>${f.name}</h3><p class="tip">${f.tip}</p></div></div>
-     <div class="pairs">${f.verbs.map(v=>`<button class="pair" data-inf="${v[0]}"><span class="w">${v[0]} → ${highlightPast(v[0],v[1])}</span><span class="es">${v[2]}</span></button>`).join('')}</div>
+     <div class="pairs">${f.verbs.map(v=>`<button class="pair" data-inf="${v[0]}"><span class="pw"><span><span class="lab">Presente</span><span class="v">${v[0]}</span></span><span class="past"><span class="lab">Pasado</span><span class="v w">${highlightPast(v[0],v[1])}</span></span></span><span class="es">${v[2]}</span></button>`).join('')}</div>
      ${f.note?`<p class="note">${f.note}</p>`:''}
    </article>`).join('') + (synth?'':'<p class="note">Este navegador no tiene voz. Lean los verbos en voz alta juntas.</p>');
   el.querySelectorAll('.pair').forEach(b=>b.addEventListener('click',()=>sayPair(byInf[b.dataset.inf])));
@@ -282,8 +289,8 @@ function renderFlash(){
   const v=T.deck[T.i];
   el.style.setProperty('--fc',`var(${v.c})`);
   el.innerHTML=`<div class="count">Tarjeta ${T.i+1} de ${T.deck.length}</div>
-   <button class="big tap" id="fw">${v.inf}</button><div class="es">${v.es}</div>
-   ${T.shown?`<button class="answer jump tap big" id="fp" style="color:var(--fc)">${v.past}</button>`:'<p class="muted">Di el pasado en voz alta y luego voltea.</p>'}
+   <div class="flab">Presente</div><button class="big tap" id="fw">${v.inf}</button><div class="es">${v.es}</div>
+   ${T.shown?`<div class="flab past">Pasado</div><button class="answer jump tap big" id="fp" style="color:var(--fc)">${v.past}</button>`:'<p class="muted">Di el pasado en voz alta y luego voltea.</p>'}
    <div class="row">
      <button class="iconbtn" id="fs" aria-label="Escuchar">${ICON_PLAY}</button>
      ${T.shown?`<button class="btn good" id="know">¡Lo sé!</button><button class="btn coral" id="dont">Todavía no</button>`:`<button class="btn" id="flip">Voltear</button>`}
@@ -324,8 +331,8 @@ function renderQuiz(){
     body=`<form class="typein" id="tf"><input id="ti" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="escribe aquí" aria-label="Pasado"><button class="btn">OK</button></form>`;
   }
   el.innerHTML=`<div class="count">Pregunta ${R.i+1} de ${R.qs.length}</div>
-    <p class="muted">¿Cuál es el pasado de…?</p>
-    <div class="row" style="align-items:center"><button class="big tap" id="qw">${v.inf}</button><button class="iconbtn" id="qs" aria-label="Escuchar">${ICON_PLAY}</button></div>
+    <p class="muted">¿Cuál es el <b>pasado</b> de este verbo en presente?</p>
+    <div class="row" style="align-items:center"><span style="display:flex;flex-direction:column;align-items:center"><span class="flab" style="margin:0">Presente</span><button class="big tap" id="qw">${v.inf}</button></span><button class="iconbtn" id="qs" aria-label="Escuchar">${ICON_PLAY}</button></div>
     <div class="es">${v.es}</div>${body}<div class="fb" id="fb"></div><div id="next"></div>`;
   el.querySelector('#qs').onclick=()=>say(v.inf);
   el.querySelector('#qw').onclick=()=>say(v.inf);
@@ -345,7 +352,7 @@ function renderQuiz(){
 function answer(ok,v){
   R.answered=true; const fb=document.getElementById('fb');
   if(ok){ R.jumps++; R.streak++; R.right++; hard.delete(v.inf); fb.className='fb ok jump'; fb.textContent=R.streak>=3?`¡Correcto! Racha de ${R.streak}`:'¡Correcto! +1 brinco'; }
-  else { R.streak=0; hard.add(v.inf); fb.className='fb no'; fb.innerHTML=`Era <b>${v.past}</b>. Lo guardé en Difíciles.`; }
+  else { R.streak=0; hard.add(v.inf); fb.className='fb no'; fb.innerHTML=`El pasado es <b>${v.past}</b>. Lo guardé en Difíciles.`; }
   saveHard(); updScore();
   const n=document.getElementById('next'); n.innerHTML='<button class="btn" id="nx">Siguiente</button>';
   const nx=n.querySelector('#nx'); nx.onclick=()=>{R.i++;renderQuiz();}; try{nx.focus()}catch(e){}
@@ -361,10 +368,10 @@ function renderDif(){
   if(!list.length){ el.innerHTML='<div class="empty"><h2>Aún no hay difíciles</h2><p class="muted">Cuando contestes “Todavía no” en las tarjetas o falles en el reto, el verbo aparece aquí para repasarlo.</p></div>'; return; }
   el.innerHTML=`<p>Estos son los que hay que repasar. Mañana en el desayuno: 5 minutos solo con esta lista.</p>
    <div class="row" style="justify-content:flex-start"><button class="btn" id="dT">Tarjetas con estos</button><button class="btn coral" id="dR">Reto con estos</button><button class="btn ghost" id="dL">Escuchar todos</button></div>
-   <div class="list">${list.map(v=>`<button class="pair" style="--fc:var(${v.c})" data-inf="${v.inf}"><span class="w">${v.inf} → <b>${v.past}</b></span><span class="es">${v.es}</span></button>`).join('')}</div>
+   <div class="list">${list.map(v=>`<button class="pair" style="--fc:var(${v.c})" data-inf="${v.inf}"><span class="pw"><span><span class="lab">Presente</span><span class="v">${v.inf}</span></span><span class="past"><span class="lab">Pasado</span><span class="v w"><b>${v.past}</b></span></span></span><span class="es">${v.es}</span></button>`).join('')}</div>
    <div class="row" style="justify-content:flex-start"><button class="btn ghost" id="dClear">Ya me los sé todos: vaciar lista</button></div>`;
   el.querySelectorAll('.pair').forEach(b=>b.addEventListener('click',()=>sayPair(byInf[b.dataset.inf])));
-  el.querySelector('#dL').onclick=()=>{const p=[];list.forEach(v=>{p.push({text:v.inf+', '+v.past+'.',rate:.75})});speakQueue(p);};
+  el.querySelector('#dL').onclick=()=>{const p=[];list.forEach(v=>{p.push({text:v.inf+'.',rate:.75});p.push({text:v.past+'.',rate:.75})});speakQueue(p);};
   el.querySelector('#dT').onclick=()=>{T.onlyHard=true;T.fam='all';goTab('tarjetas');makeChips('chipsT',T,()=>{T.onlyHard=false;newDeck();});newDeck();};
   el.querySelector('#dR').onclick=()=>{R.onlyHard=true;R.fam='all';goTab('reto');makeChips('chipsR',R,()=>{R.onlyHard=false;newQuiz();});newQuiz();};
   el.querySelector('#dClear').onclick=function(){ if(this.dataset.c){hard.clear();saveHard();renderDif();} else {this.dataset.c='1';this.textContent='Toca otra vez para confirmar';} };
