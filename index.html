@@ -91,6 +91,19 @@ details ol{margin:10px 0 0;padding-left:20px;display:flex;flex-direction:column;
 .pair .w b{color:var(--fc)}
 .pair .es{font-size:13px;color:var(--muted)}
 .pair.speaking{border-color:var(--fc)}
+.pbox{display:flex;flex-direction:column;border:2px solid var(--line);border-radius:14px;min-width:0}
+.pbox .pair{border:0;width:100%}
+.pbox.open{grid-column:1/-1;border-color:var(--fc)}
+.more{font-size:12px;font-weight:800;color:var(--fc);margin-top:2px}
+.ex{display:flex;align-items:center;gap:14px;padding:4px 12px 12px;flex-wrap:wrap}
+.ex .emo{font-size:52px;line-height:1}
+.exbody{flex:1;min-width:160px}
+.exen{font-size:19px;font-weight:700}
+.exen b{color:var(--fc)}
+.exes{font-size:14px;color:var(--muted)}
+.flash .ex{justify-content:center;padding:4px 0 0;max-width:420px}
+.flash .ex .emo{font-size:44px}
+.flash .exbody{text-align:left}
 .note{font-size:14px;background:color-mix(in srgb,var(--sun) 22%,transparent);border-radius:12px;padding:8px 12px}
 
 .chips{display:flex;gap:6px;flex-wrap:wrap}
@@ -194,6 +207,76 @@ const byInf = Object.fromEntries(ALL.map(v=>[v.inf,v]));
 
 const ICON_PLAY='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>';
 
+const EX={
+ begin:['🎬','The movie began at seven.','La película empezó a las siete.'],
+ drink:['🧃','I drank orange juice.','Tomé jugo de naranja.'],
+ ring:['🔔','The school bell rang.','Sonó la campana de la escuela.'],
+ sing:['🎤','We sang a song.','Cantamos una canción.'],
+ swim:['🏊‍♀️','She swam in the pool.','Ella nadó en la alberca.'],
+ shrink:['👕','My sweater shrank.','Mi suéter se encogió.'],
+ sit:['🪑','I sat next to my friend.','Me senté junto a mi amiga.'],
+ spring:['🐈','The cat sprung onto the bed.','El gato saltó a la cama.'],
+ bring:['🍱','I brought my lunch.','Traje mi lunch.'],
+ buy:['🍦','Mom bought ice cream.','Mamá compró helado.'],
+ fight:['🐉','The knight fought a dragon.','El caballero peleó con un dragón.'],
+ think:['🐶','I thought about my dog.','Pensé en mi perro.'],
+ catch:['⚾','I caught the ball.','Atrapé la pelota.'],
+ teach:['👩‍🏫','My teacher taught us English.','Mi maestra nos enseñó inglés.'],
+ know:['💡','I knew the answer!','¡Sabía la respuesta!'],
+ grow:['🌱','The plant grew very tall.','La planta creció mucho.'],
+ throw:['🥎','He threw the ball far.','Él lanzó la pelota lejos.'],
+ fly:['🤸‍♀️','I flew on the trampoline!','¡Volé en el trampolín!'],
+ break:['✏️','I broke my pencil.','Rompí mi lápiz.'],
+ choose:['👗','She chose the blue dress.','Ella eligió el vestido azul.'],
+ speak:['🗣️','We spoke English in class.','Hablamos inglés en clase.'],
+ steal:['🐒','The monkey stole a banana.','El mono robó un plátano.'],
+ freeze:['🧊','The water froze.','El agua se congeló.'],
+ wake:['⏰','I woke up early.','Me desperté temprano.'],
+ drive:['🚗','Dad drove to the park.','Papá manejó al parque.'],
+ ride:['🚲','I rode my bike.','Me subí a mi bici.'],
+ rise:['🌅','The sun rose.','Salió el sol.'],
+ swear:['🤞','He swore to tell the truth.','Él juró decir la verdad.'],
+ send:['✉️','I sent a letter to Grandma.','Le mandé una carta a la abuela.'],
+ build:['🏰','We built a sand castle.','Construimos un castillo de arena.'],
+ lose:['👟','I lost my shoe.','Perdí mi zapato.'],
+ mean:['🙏','I meant to say thank you.','Quise decir gracias.'],
+ weep:['😢','The baby wept.','El bebé lloró.'],
+ feed:['🐱','I fed my cat.','Le di de comer a mi gato.'],
+ take:['📷','I took a photo.','Tomé una foto.'],
+ shake:['🐕','The wet dog shook.','El perro mojado se sacudió.'],
+ understand:['✅','I understood the lesson.','Entendí la lección.'],
+ come:['🎉','My friends came to my party.','Mis amigas vinieron a mi fiesta.'],
+ give:['🌷','I gave Mom a flower.','Le di una flor a mamá.'],
+ eat:['🍕','We ate pizza.','Comimos pizza.'],
+ run:['🏃‍♀️','I ran very fast.','Corrí muy rápido.'],
+ get:['🎁','I got a present.','Recibí un regalo.'],
+ win:['🏆','Our team won the game.','Nuestro equipo ganó el partido.'],
+ fall:['🍂','A leaf fell from the tree.','Una hoja cayó del árbol.'],
+ see:['🌈','I saw a rainbow.','Vi un arcoíris.'],
+ hide:['🙈','The cat hid under the bed.','El gato se escondió bajo la cama.'],
+ lie:['🌿','I lay on the grass.','Me acosté en el pasto.'],
+ be:['😊','I was happy. They were at home.','Yo estaba feliz. Ellos estaban en casa.'],
+ do:['📚','I did my homework.','Hice mi tarea.'],
+ go:['🏖️','We went to the beach.','Fuimos a la playa.'],
+ have:['☀️','I had a great day.','Tuve un gran día.'],
+ say:['👋','She said hello.','Ella dijo hola.'],
+ tell:['📖','Grandpa told a story.','El abuelo contó un cuento.'],
+ will:['🗓️','She said she would come.','Ella dijo que vendría.']
+};
+function boldPast(v,sent){ const ws=v.past.split('/'); return sent.replace(new RegExp('\\b('+ws.join('|')+')\\b','gi'),'<b>$1</b>'); }
+function sayText(t){ if(!synth) return; try{ synth.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; u.rate=0.75; if(enVoice) u.voice=enVoice; synth.speak(u);}catch(e){} }
+function exHTML(v){ const e=EX[v.inf]; if(!e) return ''; return `<div class="ex"><div class="emo" aria-hidden="true">${e[0]}</div><div class="exbody"><p class="exen">${boldPast(v,e[1])}</p><p class="exes">${e[2]}</p></div><button class="iconbtn explay" data-inf="${v.inf}" aria-label="Escuchar ejemplo">${ICON_PLAY}</button></div>`; }
+function pairHTML(v,cls){ return `<div class="pbox" style="--fc:var(${v.c})"><button class="pair" data-inf="${v.inf}" aria-expanded="false"><span class="pw"><span><span class="lab">Presente</span><span class="v">${v.inf}</span></span><span class="past"><span class="lab">Pasado</span><span class="v w">${cls?'<b>'+v.past+'</b>':highlightPast(v.inf,v.past)}</span></span></span><span class="es">${v.es}</span><span class="more">Ver ejemplo</span></button><div class="exwrap" hidden>${exHTML(v)}</div></div>`; }
+function wirePairs(root){
+  root.querySelectorAll('.pair').forEach(b=>b.addEventListener('click',()=>{
+    const box=b.closest('.pbox'), wrap=box.querySelector('.exwrap'), open=wrap.hidden;
+    root.querySelectorAll('.pbox').forEach(x=>{x.classList.remove('open');x.querySelector('.exwrap').hidden=true;x.querySelector('.pair').setAttribute('aria-expanded','false');x.querySelector('.more').textContent='Ver ejemplo';});
+    if(open){ box.classList.add('open'); wrap.hidden=false; b.setAttribute('aria-expanded','true'); b.querySelector('.more').textContent='Cerrar'; }
+    sayPair(byInf[b.dataset.inf]);
+  }));
+  root.querySelectorAll('.explay').forEach(b=>b.addEventListener('click',()=>sayText(EX[b.dataset.inf][1])));
+}
+
 /* ---------- Voz ---------- */
 const synth = ('speechSynthesis' in window) ? window.speechSynthesis : null;
 let enVoice=null;
@@ -257,10 +340,10 @@ function renderEscucha(){
   el.innerHTML = FAM.map(f=>`
    <article class="fam" style="--fc:var(${f.c})">
      <div class="famhead"><div><h3>${f.name}</h3><p class="tip">${f.tip}</p></div></div>
-     <div class="pairs">${f.verbs.map(v=>`<button class="pair" data-inf="${v[0]}"><span class="pw"><span><span class="lab">Presente</span><span class="v">${v[0]}</span></span><span class="past"><span class="lab">Pasado</span><span class="v w">${highlightPast(v[0],v[1])}</span></span></span><span class="es">${v[2]}</span></button>`).join('')}</div>
+     <div class="pairs">${f.verbs.map(v=>pairHTML(byInf[v[0]])).join('')}</div>
      ${f.note?`<p class="note">${f.note}</p>`:''}
    </article>`).join('') + (synth?'':'<p class="note">Este navegador no tiene voz. Lean los verbos en voz alta juntas.</p>');
-  el.querySelectorAll('.pair').forEach(b=>b.addEventListener('click',()=>sayPair(byInf[b.dataset.inf])));
+  wirePairs(el);
 }
 
 /* ---------- Filtros ---------- */
@@ -290,7 +373,7 @@ function renderFlash(){
   el.style.setProperty('--fc',`var(${v.c})`);
   el.innerHTML=`<div class="count">Tarjeta ${T.i+1} de ${T.deck.length}</div>
    <div class="flab">Presente</div><button class="big tap" id="fw">${v.inf}</button><div class="es">${v.es}</div>
-   ${T.shown?`<div class="flab past">Pasado</div><button class="answer jump tap big" id="fp" style="color:var(--fc)">${v.past}</button>`:'<p class="muted">Di el pasado en voz alta y luego voltea.</p>'}
+   ${T.shown?`<div class="flab past">Pasado</div><button class="answer jump tap big" id="fp" style="color:var(--fc)">${v.past}</button>${exHTML(v)}`:'<p class="muted">Di el pasado en voz alta y luego voltea.</p>'}
    <div class="row">
      <button class="iconbtn" id="fs" aria-label="Escuchar">${ICON_PLAY}</button>
      ${T.shown?`<button class="btn good" id="know">¡Lo sé!</button><button class="btn coral" id="dont">Todavía no</button>`:`<button class="btn" id="flip">Voltear</button>`}
@@ -298,6 +381,7 @@ function renderFlash(){
   el.querySelector('#fs').onclick=()=>T.shown?sayPair(v):say(v.inf);
   el.querySelector('#fw').onclick=()=>say(v.inf);
   const fp=el.querySelector('#fp'); if(fp) fp.onclick=()=>say(v.past);
+  const xp=el.querySelector('.explay'); if(xp) xp.onclick=()=>sayText(EX[v.inf][1]);
   if(T.shown){
     el.querySelector('#know').onclick=()=>{hard.delete(v.inf);saveHard();T.i++;T.shown=false;renderFlash();};
     el.querySelector('#dont').onclick=()=>{hard.add(v.inf);saveHard();T.i++;T.shown=false;renderFlash();};
@@ -368,9 +452,9 @@ function renderDif(){
   if(!list.length){ el.innerHTML='<div class="empty"><h2>Aún no hay difíciles</h2><p class="muted">Cuando contestes “Todavía no” en las tarjetas o falles en el reto, el verbo aparece aquí para repasarlo.</p></div>'; return; }
   el.innerHTML=`<p>Estos son los que hay que repasar. Mañana en el desayuno: 5 minutos solo con esta lista.</p>
    <div class="row" style="justify-content:flex-start"><button class="btn" id="dT">Tarjetas con estos</button><button class="btn coral" id="dR">Reto con estos</button><button class="btn ghost" id="dL">Escuchar todos</button></div>
-   <div class="list">${list.map(v=>`<button class="pair" style="--fc:var(${v.c})" data-inf="${v.inf}"><span class="pw"><span><span class="lab">Presente</span><span class="v">${v.inf}</span></span><span class="past"><span class="lab">Pasado</span><span class="v w"><b>${v.past}</b></span></span></span><span class="es">${v.es}</span></button>`).join('')}</div>
+   <div class="list">${list.map(v=>pairHTML(v,true)).join('')}</div>
    <div class="row" style="justify-content:flex-start"><button class="btn ghost" id="dClear">Ya me los sé todos: vaciar lista</button></div>`;
-  el.querySelectorAll('.pair').forEach(b=>b.addEventListener('click',()=>sayPair(byInf[b.dataset.inf])));
+  wirePairs(el);
   el.querySelector('#dL').onclick=()=>{const p=[];list.forEach(v=>{p.push({text:v.inf+'.',rate:.75});p.push({text:v.past+'.',rate:.75})});speakQueue(p);};
   el.querySelector('#dT').onclick=()=>{T.onlyHard=true;T.fam='all';goTab('tarjetas');makeChips('chipsT',T,()=>{T.onlyHard=false;newDeck();});newDeck();};
   el.querySelector('#dR').onclick=()=>{R.onlyHard=true;R.fam='all';goTab('reto');makeChips('chipsR',R,()=>{R.onlyHard=false;newQuiz();});newQuiz();};
