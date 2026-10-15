@@ -213,7 +213,17 @@ function speakQueue(parts, onEach){
   }catch(e){}
 }
 function say(t){ speakQueue([{text:t+'.'}]); }
-function sayPair(v){ speakQueue([{text:v.inf+'.'},{text:'…',rate:.5},{text:v.past+'.'}]); }
+function sayPair(v){
+  if(!synth) return;
+  try{
+    synth.cancel();
+    const mk=t=>{const u=new SpeechSynthesisUtterance(clean(t));u.lang='en-US';u.rate=0.7;if(enVoice)u.voice=enVoice;return u;};
+    const a=mk(v.inf), b=mk(v.past);
+    let done=false; const next=()=>{ if(done) return; done=true; setTimeout(()=>{try{synth.speak(b)}catch(e){}},450); };
+    a.onend=next;
+    synth.speak(a);
+  }catch(e){}
+}
 
 /* ---------- Difíciles (guardado local) ---------- */
 let hard = new Set();
@@ -354,7 +364,7 @@ function renderDif(){
    <div class="list">${list.map(v=>`<button class="pair" style="--fc:var(${v.c})" data-inf="${v.inf}"><span class="w">${v.inf} → <b>${v.past}</b></span><span class="es">${v.es}</span></button>`).join('')}</div>
    <div class="row" style="justify-content:flex-start"><button class="btn ghost" id="dClear">Ya me los sé todos: vaciar lista</button></div>`;
   el.querySelectorAll('.pair').forEach(b=>b.addEventListener('click',()=>sayPair(byInf[b.dataset.inf])));
-  el.querySelector('#dL').onclick=()=>{const p=[];list.forEach(v=>{p.push({text:v.inf+',',rate:.75});p.push({text:v.past+'.',rate:.75})});speakQueue(p);};
+  el.querySelector('#dL').onclick=()=>{const p=[];list.forEach(v=>{p.push({text:v.inf+', '+v.past+'.',rate:.75})});speakQueue(p);};
   el.querySelector('#dT').onclick=()=>{T.onlyHard=true;T.fam='all';goTab('tarjetas');makeChips('chipsT',T,()=>{T.onlyHard=false;newDeck();});newDeck();};
   el.querySelector('#dR').onclick=()=>{R.onlyHard=true;R.fam='all';goTab('reto');makeChips('chipsR',R,()=>{R.onlyHard=false;newQuiz();});newQuiz();};
   el.querySelector('#dClear').onclick=function(){ if(this.dataset.c){hard.clear();saveHard();renderDif();} else {this.dataset.c='1';this.textContent='Toca otra vez para confirmar';} };
